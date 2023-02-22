@@ -18,14 +18,14 @@ namespace app_with_login
             Debug.Assert(IsHandleCreated, "Expecting handle exists.");
 
             // Call BeginInvoke on the new handle so as not to block the CTor.
-            BeginInvoke(new Action(()=> StartForm()));
+            BeginInvoke(new Action(()=> execSplashFlow()));
         }
         protected override void SetVisibleCore(bool value) =>
             base.SetVisibleCore(value && _initialized);
 
         bool _initialized = false;
 
-        private void StartForm()
+        private void execSplashFlow()
         {
             using (var splash = new SplashForm())
             {
