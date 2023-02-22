@@ -1,10 +1,19 @@
-The `Application.Run` call should only be used on `Program.cs` to invoke the main form. Since, we don't want the main form to be the first form shown, so I have found two things to be important:
+Looking at your code, the fundamental issue is that the `Application.Run(Form)` method is a blocking call intended to run the message loop of the main form specifically. The Microsoft documentation for [Application.Run(Form)](https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.application.run) explains:
 
-- Force the main form Handle creation so that it's the first window _created_. Ordinarily the Handle doesn't come into existence until it's shown. Therefore, it needs to be coerced.
+>Begins running a standard application message loop on the current thread, and makes the specified form visible. [...] Every running Windows-based application requires an active message loop, called the main message loop. When the main message loop is closed, the application exits.
+
+So, it should only be used in `Program.cs` to invoke the main form. 
+
+***
+Reading your code, the intent seems to be to spawn a separate thread to display a splash screen. But the splash screen has a message loop also, which needs to run on the UI thread (even as it spawns background tasks to make API calls and read databases and the like).
+
+Since we don't want the main form to be the first form shown, I have found two things to be important:
+
+- Force the main form `Handle` creation so that the message that creates the splash can be posted into the main form's message queue using `BeginInvoke`. This allows the main form ctor to return. Ordinarily the handle (the native `hWnd`) doesn't come into existence until it's shown. Therefore, it needs to be coerced while it's still hidden.
 
 - Override the `SetVisibleCore()` preventing the main window from becoming visible until the Splash has finished processing.
 
-[![screenshot][1]][1]
+[![startup flow][1]][1]
 
 ***
     public partial class MainForm : Form
@@ -12,18 +21,22 @@ The `Application.Run` call should only be used on `Program.cs` to invoke the mai
         public MainForm()
         {
             InitializeComponent();
+
+            Debug.Assert(!IsHandleCreated, "Expecting handle is not yet created.");
             // Ordinarily we don't get the handle until
             // window is shown. But we want it now.
             _ = Handle;
+            Debug.Assert(IsHandleCreated, "Expecting handle exists.");
+
             // Call BeginInvoke on the new handle so as not to block the CTor.
-            BeginInvoke(new Action(()=> execSplashFlow()));
+            BeginInvoke(new Action(()=> StartForm()));
         }
         protected override void SetVisibleCore(bool value) =>
             base.SetVisibleCore(value && _initialized);
 
         bool _initialized = false;
 
-        private void execSplashFlow()
+        private void StartForm()
         {
             using (var splash = new SplashForm())
             {
@@ -74,4 +87,4 @@ The async initialization can be performed in the Splash class itself _or_ it can
     }
 
 
-  [1]: https://i.stack.imgur.com/kUINY.png
+  [1]: https://i.stack.imgur.com/zDXTa.png
