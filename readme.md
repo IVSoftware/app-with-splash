@@ -51,7 +51,7 @@ Since we don't want the main form to be the first form shown, I have found two t
 ***
 **Splash Example**
 
-The async initialization can be performed in the Splash class itself _or_ it can fire events causeing the main app to do things. Either way, when it closes itself the main for will set the `_initialized` bool to `true` and it is now capable of being visible.
+The async initialization can be performed in the Splash class itself _or_ it can fire events causing the main app to do things. Either way, when it closes itself the main form will set the `_initialized` bool to `true` and it is now capable of being visible.
 
     public partial class SplashForm : Form
     {
