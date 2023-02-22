@@ -36,7 +36,7 @@ namespace app_with_login
                 progressBar.Value = 75;
                 await Task.Delay(1000);
                 labelProgress.Text = "Success!";
-                progressBar.Value = 75;
+                progressBar.Value = 100;
                 await Task.Delay(1000);
                 DialogResult= DialogResult.OK;
             }

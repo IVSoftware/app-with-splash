@@ -60,11 +60,13 @@ The async initialization can be performed in the Splash class itself _or_ it can
             if (Visible)
             {
                 labelProgress.Text = "Updating installation...";
-                progressBar.Value = 5;
-                await Task.Delay(1000);
+                progressBar.Value = 5;progressBar.Value = 25;
+
+                // SIMULATED background task like making an API call or loading a
+                // database (long-running task that doesn't require the UI thread).
                 labelProgress.Text = "Loading avatars...";
-                progressBar.Value = 25;
                 await Task.Delay(1000);
+
                 labelProgress.Text = "Fetching game history...";
                 progressBar.Value = 50;
                 await Task.Delay(1000);
@@ -72,7 +74,7 @@ The async initialization can be performed in the Splash class itself _or_ it can
                 progressBar.Value = 75;
                 await Task.Delay(1000);
                 labelProgress.Text = "Success!";
-                progressBar.Value = 75;
+                progressBar.Value = 100;
                 await Task.Delay(1000);
                 DialogResult= DialogResult.OK;
             }
